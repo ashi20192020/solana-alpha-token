@@ -3,10 +3,10 @@ resolution = true
 skip-lint = false
 
 [programs.devnet]
-alpha_token = "ALPHA1111111111111111111111111111111111"
+alpha_token = "EQfYTxFVJT4B1Chm4wVZ8PsjQH3ZuahvW985YgVoXJfR"
 
 [programs.testnet]
-alpha_token = "ALPHA1111111111111111111111111111111111"
+alpha_token = "EQfYTxFVJT4B1Chm4wVZ8PsjQH3ZuahvW985YgVoXJfR"
 
 [registry]
 url = "https://api.apr.dev"

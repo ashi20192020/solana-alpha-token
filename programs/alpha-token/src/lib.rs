@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
 
-declare_id!("ALPHA1111111111111111111111111111111111");
+declare_id!("EQfYTxFVJT4B1Chm4wVZ8PsjQH3ZuahvW985YgVoXJfR");
 
 const TAX_RATE: u64 = 5; // 5% tax
 const TAX_DIVISOR: u64 = 100;
