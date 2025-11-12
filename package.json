@@ -1,0 +1,32 @@
+{
+  "name": "solana-alpha-token",
+  "version": "1.0.0",
+  "description": "Alpha token with 5% tax on Solana testnet",
+  "main": "index.js",
+  "scripts": {
+    "build": "anchor build",
+    "deploy": "node scripts/deploy.js",
+    "deploy-program": "anchor deploy --provider.cluster testnet",
+    "test": "anchor test --skip-local-validator",
+    "renounce": "node scripts/renounce.js",
+    "transfer": "node scripts/transfer-example.js"
+  },
+  "keywords": [
+    "solana",
+    "token",
+    "spl",
+    "tax"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@coral-xyz/anchor": "^0.29.0",
+    "@solana/web3.js": "^1.87.6",
+    "@solana/spl-token": "^0.3.9"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3"
+  }
+}
+
