@@ -85,15 +85,17 @@ pub struct Initialize<'info> {
 pub struct TransferWithTax<'info> {
     #[account(
         seeds = [b"config"],
-        bump,
-        has_one = tax_wallet @ ErrorCode::InvalidTaxWallet
+        bump
     )]
     pub config: Account<'info, Config>,
     #[account(mut)]
     pub from: Account<'info, TokenAccount>,
     #[account(mut)]
     pub to: Account<'info, TokenAccount>,
-    #[account(mut)]
+    #[account(
+        mut,
+        constraint = tax_wallet.owner == config.tax_wallet @ ErrorCode::InvalidTaxWallet
+    )]
     pub tax_wallet: Account<'info, TokenAccount>,
     pub authority: Signer<'info>,
     pub token_program: Program<'info, Token>,

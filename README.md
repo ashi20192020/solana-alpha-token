@@ -1,14 +1,21 @@
 # Solana Alpha Token - Testnet Deployment
 
-A Solana token with 5% tax on all buy/sell/transfer operations, deployed on testnet.
+A Solana token with 5% tax on all transfers, deployed on Solana testnet.
 
 ## Token Details
 
 - **Ticker**: ALPHA
 - **Total Supply**: 1,000,000 tokens
-- **Tax Rate**: 5% on all transfers
+- **Tax Rate**: 5% on all transfers (when using `transfer_with_tax`)
 - **Decimals**: 6
 - **Network**: Solana Testnet
+
+## Important Addresses
+
+- **Token Mint**: `EYZ35itafVgJTF4X7hQTt84WCTzERXFpBNpqcnbPTapB`
+- **Program ID**: `EQfYTxFVJT4B1Chm4wVZ8PsjQH3ZuahvW985YgVoXJfR`
+- **Config PDA**: `U1FaJHxfCYgbpCMbox38KPu2hXBNpmwBvU3fDfQ5R18`
+- **Tax Wallet**: `4z7ELCZANByrAdHQj17SXz14Zxge4ixDdMQEb7QrMcjz`
 
 ## Prerequisites
 
@@ -98,7 +105,7 @@ This will:
 
 ## Deploy
 
-### Option 1: Full Deployment Script (Recommended)
+### Full Deployment Script (Recommended)
 
 The deployment script handles everything automatically:
 
@@ -107,15 +114,17 @@ npm run deploy
 ```
 
 This script will:
-1. Create the SPL token mint
-2. Mint 1 million tokens
-3. Initialize the tax program
-4. Set up the tax wallet
-5. Renounce mint authority
-6. Renounce freeze authority
-7. Renounce program ownership
+1. ✅ Build the program if not already built
+2. ✅ Deploy the program to testnet
+3. ✅ Create the SPL token mint
+4. ✅ Mint 1,000,000 ALPHA tokens
+5. ✅ Initialize the tax program
+6. ✅ Set up the tax wallet
+7. ✅ Renounce mint authority
+8. ✅ Renounce freeze authority
+9. ✅ Renounce program ownership
 
-### Option 2: Manual Deployment
+### Manual Deployment
 
 1. **Deploy the program**
    ```bash
@@ -127,16 +136,39 @@ This script will:
    node scripts/deploy.js
    ```
 
-3. **Renounce ownership (if not done automatically)**
-   ```bash
-   node scripts/renounce.js <TOKEN_MINT_ADDRESS>
-   ```
+## Testing
+
+### Test the 5% Tax
+
+Run the automated test script to verify the tax works correctly:
+
+```bash
+npm run test-tax <TOKEN_MINT> <RECIPIENT_ADDRESS> <AMOUNT>
+```
+
+**Example:**
+```bash
+npm run test-tax EYZ35itafVgJTF4X7hQTt84WCTzERXFpBNpqcnbPTapB 4sLHchfZWMg7n8Lb1gRQLJVkAtt1Fh2b1vtibZyx8Gup 1000
+```
+
+This will:
+- Transfer 1000 tokens
+- Apply 5% tax (50 tokens to tax wallet)
+- Send 950 tokens to recipient
+- Automatically verify all amounts are correct
+
+**Expected Results:**
+- ✅ Sender loses: 1000 tokens
+- ✅ Tax wallet receives: 50 tokens (5%)
+- ✅ Recipient receives: 950 tokens (95%)
+
+For detailed testing instructions, see [TESTING.md](./TESTING.md).
 
 ## Program Architecture
 
 The program implements a tax mechanism that:
 
-- **Intercepts transfers**: All token transfers go through the `transfer_with_tax` function
+- **Intercepts transfers**: Token transfers go through the `transfer_with_tax` function
 - **Calculates tax**: 5% of each transfer amount
 - **Distributes funds**: Tax goes to the designated tax wallet, remainder to recipient
 - **Prevents changes**: Once renounced, the contract cannot be modified
@@ -167,6 +199,12 @@ await program.methods
     .rpc();
 ```
 
+Or use the test script:
+
+```bash
+npm run test-tax <TOKEN_MINT> <RECIPIENT_ADDRESS> <AMOUNT>
+```
+
 ### Direct SPL Transfers
 
 ⚠️ **Important**: Direct SPL token transfers (bypassing the program) will NOT have tax applied. The tax only applies when using the program's `transfer_with_tax` function.
@@ -175,40 +213,25 @@ To enforce tax on ALL transfers, you would need to:
 - Use Solana Token Extensions (Transfer Hook) - requires newer SPL Token version
 - Or set up a DEX/router that routes all transfers through the program
 
-For this implementation, the tax applies when users explicitly use the `transfer_with_tax` instruction.
-
 ## Renouncing Ownership
 
-The contract can be renounced using:
-
-```bash
-node scripts/renounce.js <TOKEN_MINT_ADDRESS>
-```
-
-Or programmatically:
-
-```javascript
-await program.methods
-    .renounceOwnership()
-    .accounts({
-        config: configPda,
-        authority: wallet.publicKey,
-    })
-    .rpc();
-```
-
-Once renounced:
+The deployment script automatically renounces all authorities. Once renounced:
 - ✅ Mint authority is disabled (no more tokens can be minted)
 - ✅ Freeze authority is disabled (tokens cannot be frozen)
 - ✅ Program ownership is renounced (config cannot be changed)
+
+**Note**: Once renounced, the contract cannot be modified. Ensure everything is correct before renouncing.
 
 ## Verification
 
 After deployment, verify your token on Solana Explorer:
 
-```
-https://explorer.solana.com/address/<TOKEN_MINT_ADDRESS>?cluster=testnet
-```
+- **Token Mint**: https://explorer.solana.com/address/EYZ35itafVgJTF4X7hQTt84WCTzERXFpBNpqcnbPTapB?cluster=testnet
+- **Program**: https://explorer.solana.com/address/EQfYTxFVJT4B1Chm4wVZ8PsjQH3ZuahvW985YgVoXJfR?cluster=testnet
+- **Config PDA**: https://explorer.solana.com/address/U1FaJHxfCYgbpCMbox38KPu2hXBNpmwBvU3fDfQ5R18?cluster=testnet
+- **Tax Wallet**: https://explorer.solana.com/address/4z7ELCZANByrAdHQj17SXz14Zxge4ixDdMQEb7QrMcjz?cluster=testnet
+
+For detailed verification and testing instructions, see [TESTING.md](./TESTING.md).
 
 ## Important Notes
 
@@ -216,11 +239,11 @@ https://explorer.solana.com/address/<TOKEN_MINT_ADDRESS>?cluster=testnet
 
 1. **Tax Wallet**: Save the tax wallet private key securely. This wallet will receive all tax payments.
 
-2. **Renouncement**: Once renounced, the contract cannot be modified. Ensure everything is correct before renouncing.
+2. **Renouncement**: Once renounced, the contract cannot be modified. The deployment script automatically renounces all authorities.
 
 3. **Direct Transfers**: Users can still transfer tokens directly using SPL Token, bypassing the tax. To enforce tax on ALL transfers, you would need to:
-   - Set the program as the mint authority (not recommended for renounced tokens)
-   - Or use a more complex mechanism with transfer hooks (Solana Token Extensions)
+   - Use Solana Token Extensions (Transfer Hook) - requires newer SPL Token version
+   - Or set up a DEX/router that routes all transfers through the program
 
 4. **Testnet Only**: This deployment is for testnet. For mainnet, ensure thorough testing and security audits.
 
@@ -239,16 +262,26 @@ anchor build
 ### Deployment Errors
 
 - **Insufficient funds**: Ensure you have at least 2 SOL for deployment
-- **Program already deployed**: The program ID is fixed. If redeploying, you may need to update the program ID in `Anchor.toml` and `lib.rs`
+  ```bash
+  solana airdrop 2
+  ```
+
+- **Program already deployed**: The program ID is fixed. If you need a new program ID, run `./scripts/setup.sh` again to generate a new keypair.
 
 ### Transaction Errors
 
 - **Insufficient balance**: Ensure the wallet has enough SOL for transaction fees
 - **Invalid accounts**: Verify all account addresses are correct
 
-## Development
+## Available Scripts
 
-### Project Structure
+- `npm run build` - Build the Anchor program
+- `npm run deploy` - Full deployment (program + token + renounce)
+- `npm run deploy-program` - Deploy only the program
+- `npm run test-tax` - Test the 5% tax functionality
+- `npm test` - Run Anchor tests
+
+## Project Structure
 
 ```
 .
@@ -257,12 +290,18 @@ anchor build
 │       └── src/
 │           └── lib.rs          # Main program logic
 ├── scripts/
-│   ├── deploy.js                # Deployment script
-│   └── renounce.js              # Renounce script
+│   ├── deploy.js                # Full deployment script
+│   ├── test-tax.js              # Tax testing script
+│   └── setup.sh                 # Initial setup script
+├── TESTING.md                   # Complete testing and verification guide
 ├── Anchor.toml                  # Anchor configuration
 ├── Cargo.toml                   # Rust workspace config
 └── package.json                 # Node.js dependencies
 ```
+
+## Documentation
+
+- **[TESTING.md](./TESTING.md)** - Complete guide for verification and testing
 
 ## License
 
@@ -274,4 +313,3 @@ For issues or questions, please check:
 - [Solana Documentation](https://docs.solana.com/)
 - [Anchor Documentation](https://www.anchor-lang.com/)
 - [SPL Token Documentation](https://spl.solana.com/token)
-

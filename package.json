@@ -8,8 +8,7 @@
     "deploy": "node scripts/deploy.js",
     "deploy-program": "anchor deploy --provider.cluster testnet",
     "test": "anchor test --skip-local-validator",
-    "renounce": "node scripts/renounce.js",
-    "transfer": "node scripts/transfer-example.js"
+    "test-tax": "node scripts/test-tax.js"
   },
   "keywords": [
     "solana",
@@ -21,7 +20,7 @@
   "license": "MIT",
   "dependencies": {
     "@coral-xyz/anchor": "^0.29.0",
-    "@solana/spl-token": "^0.1.8",
+    "@solana/spl-token": "^0.3.9",
     "@solana/web3.js": "^1.87.6"
   },
   "devDependencies": {
